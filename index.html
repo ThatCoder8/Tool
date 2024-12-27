@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warmth and Competence Word Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 10px;
+        }
+        .result {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Warmth and Competence Word Analyzer</h1>
+        <p>Paste your text below to analyze the categorization of words into warmth and competence.</p>
+        <textarea id="inputText" placeholder="Paste text here..."></textarea>
+        <button onclick="analyzeText()">Analyze</button>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        async function categorizeWithChatGPT(word) {
+            const warmthKeywords = [
+                "collaborative", "team player", "patient", "compassionate", "trustworthy", "friendly", "likable", 
+                "relatable", "kind", "approachable", "caring", "empathetic", "supportive", "generous", "inclusive", 
+                "warm", "gentle", "understanding", "helpful", "hey", "you", "how", "there", "what's", "up"
+            ];
+
+            const competenceKeywords = [
+                "impressive", "powerful", "efficient", "memorable", "capable", "smart", "dependable", "important", 
+                "confident", "skilled", "knowledgeable", "strategic", "organized", "respected", "professional", 
+                "authoritative", "proficient", "innovative"
+            ];
+
+            if (warmthKeywords.includes(word)) {
+                return "Warmth";
+            } else if (competenceKeywords.includes(word)) {
+                return "Competence";
+            } else {
+                // Default logic for unclear words
+                const relationalWords = ["hey", "hello", "hi", "you", "how", "there", "are", "what's", "up"];
+                if (relationalWords.includes(word)) {
+                    return "Warmth";
+                } else {
+                    return "Competence";
+                }
+            }
+        }
+
+        async function analyzeText() {
+            const text = document.getElementById('inputText').value.toLowerCase();
+            const words = text.match(/\b\w+\b/g) || [];
+
+            const categorizedWords = await Promise.all(words.map(async word => {
+                const category = await categorizeWithChatGPT(word);
+                return { word, category };
+            }));
+
+            const warmthCount = categorizedWords.filter(w => w.category === "Warmth").length;
+            const competenceCount = categorizedWords.filter(w => w.category === "Competence").length;
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h2>Analysis Results</h2>
+                <p><strong>Warmth Words:</strong> ${warmthCount}</p>
+                <p><strong>Competence Words:</strong> ${competenceCount}</p>
+                <h3>Word Categorization:</h3>
+                <ul>
+                    ${categorizedWords.map(w => `<li>${w.word}: ${w.category}</li>`).join('')}
+                </ul>
+            `;
+        }
+    </script>
+</body>
+</html>
+
+
+
+
